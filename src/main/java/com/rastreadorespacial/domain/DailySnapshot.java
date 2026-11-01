@@ -58,6 +58,7 @@ public final class DailySnapshot {
      */
     public Optional<SpaceObject> maisProximo() {
         return objetos.stream()
+                .filter(obj -> !(obj instanceof Satellite))
                 .filter(HasDistance.class::isInstance)
                 .map(HasDistance.class::cast)
                 .filter(hd -> hd.getDistanciaDeReferencia().isPresent())
