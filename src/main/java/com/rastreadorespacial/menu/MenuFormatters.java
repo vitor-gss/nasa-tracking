@@ -6,7 +6,6 @@ import com.rastreadorespacial.domain.Distance;
 import com.rastreadorespacial.domain.DistanceUnit;
 import com.rastreadorespacial.domain.HasDistance;
 import com.rastreadorespacial.domain.Position;
-import com.rastreadorespacial.domain.RiskLevel;
 import com.rastreadorespacial.domain.Satellite;
 import com.rastreadorespacial.domain.SpaceObject;
 
