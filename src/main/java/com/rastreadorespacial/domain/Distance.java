@@ -79,6 +79,15 @@ public final class Distance implements Comparable<Distance> {
     }
 
     /**
+     * Alias de compatibilidade para o nome usado em testes e código legado.
+     *
+     * @return valor em quilômetros
+     */
+    public double emKilometros() {
+        return emQuilometros();
+    }
+
+    /**
      * Retorna o valor da distância convertido para milhas (mi).
      *
      * @return valor em milhas

@@ -2,11 +2,8 @@ package com.rastreadorespacial.menu;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rastreadorespacial.api.ApodClient;
-import com.rastreadorespacial.api.CelestrakClient;
-import com.rastreadorespacial.api.NeoWsClient;
-import com.rastreadorespacial.api.SbdbClient;
 import com.rastreadorespacial.api.SpaceApiException;
+import com.rastreadorespacial.api.SpaceClientFactory;
 import com.rastreadorespacial.api.SpaceDataClient;
 import com.rastreadorespacial.api.SpaceDataParser;
 import com.rastreadorespacial.cache.CachedDataResult;
@@ -37,8 +34,21 @@ public final class MenuContext {
     private DistanceUnit unidadeDistancia = DistanceUnit.KILOMETERS;
     private ApodInfo apod;
 
+    // Padrão Factory usado aqui: o MenuContext não cria clientes manualmente;
+    // ele recebe objetos já produzidos pela SpaceClientFactory.
     public MenuContext() {
-        this(new SpaceDataService(), new NeoWsClient(), new ApodClient(), new CelestrakClient(), new SbdbClient(), System.out);
+        this(new SpaceDataService(),
+                SpaceClientFactory.create(SpaceClientFactory.ClientType.NEO_WS),
+                SpaceClientFactory.create(SpaceClientFactory.ClientType.APOD),
+                SpaceClientFactory.create(SpaceClientFactory.ClientType.CELESTRAK),
+                SpaceClientFactory.create(SpaceClientFactory.ClientType.SBDB),
+                System.out);
+    }
+
+    // Padrão Builder: permite montar o MenuContext com dependências opcionais
+    // sem criar sobrecarregas de construtor em vários pontos do código.
+    public static Builder builder() {
+        return new Builder();
     }
 
     public MenuContext(SpaceDataService dataService,
@@ -168,4 +178,49 @@ public final class MenuContext {
     }
 
     public record ApodInfo(String titulo, String data, String explicacao, String url) {}
+
+    // Builder interno do MenuContext: cada setter valida a dependência e o objeto final
+    // é montado em build(), mantendo a criação legível e segura.
+    public static final class Builder {
+        private SpaceDataService dataService = new SpaceDataService();
+        private SpaceDataClient neoWsClient = SpaceClientFactory.create(SpaceClientFactory.ClientType.NEO_WS);
+        private SpaceDataClient apodClient = SpaceClientFactory.create(SpaceClientFactory.ClientType.APOD);
+        private SpaceDataClient celestrakClient = SpaceClientFactory.create(SpaceClientFactory.ClientType.CELESTRAK);
+        private SpaceDataClient sbdbClient = SpaceClientFactory.create(SpaceClientFactory.ClientType.SBDB);
+        private PrintStream output = System.out;
+
+        public Builder dataService(SpaceDataService dataService) {
+            this.dataService = Objects.requireNonNull(dataService, "O serviço de dados não pode ser nulo.");
+            return this;
+        }
+
+        public Builder neoWsClient(SpaceDataClient client) {
+            this.neoWsClient = Objects.requireNonNull(client, "O cliente NeoWs não pode ser nulo.");
+            return this;
+        }
+
+        public Builder apodClient(SpaceDataClient client) {
+            this.apodClient = Objects.requireNonNull(client, "O cliente APOD não pode ser nulo.");
+            return this;
+        }
+
+        public Builder celestrakClient(SpaceDataClient client) {
+            this.celestrakClient = Objects.requireNonNull(client, "O cliente Celestrak não pode ser nulo.");
+            return this;
+        }
+
+        public Builder sbdbClient(SpaceDataClient client) {
+            this.sbdbClient = Objects.requireNonNull(client, "O cliente SBDB não pode ser nulo.");
+            return this;
+        }
+
+        public Builder output(PrintStream output) {
+            this.output = Objects.requireNonNull(output, "A saída não pode ser nula.");
+            return this;
+        }
+
+        public MenuContext build() {
+            return new MenuContext(dataService, neoWsClient, apodClient, celestrakClient, sbdbClient, output);
+        }
+    }
 }

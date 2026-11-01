@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         AppConfig.initDirectories();
-        MenuContext context = new MenuContext();
+        MenuContext context = MenuContext.builder().build();
         MenuNavigator navigator = new MenuNavigator(new Scanner(System.in), System.out);
         navigator.iniciar(new MainMenuScreen(navigator, context));
         navigator.loop();
