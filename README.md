@@ -39,3 +39,22 @@ mvn test
 mvn compile exec:java
 ```
 
+---
+
+## Alterações de arquitetura e comportamento
+
+### Padrões criacionais
+
+- **Factory (`SpaceClientFactory`)**: concentra a criação dos clientes NeoWs, APOD, Celestrak e SBDB. Isso evita espalhar a instanciação das implementações concretas e mantém a criação dos clientes em um único ponto.
+- **Builder (`MenuContext.Builder`)**: permite montar o contexto da aplicação com valores padrão ou substituir dependências individualmente. Isso deixa a inicialização mais legível e facilita configurar clientes, serviço de dados e saída em testes sem multiplicar construtores.
+
+### Padrões estruturais
+
+- **Facade (`SpaceTrackingFacade`)**: centraliza o acesso às fontes de dados, ao serviço de cache e ao registro de objetos. Isso oferece uma entrada única para operações comuns de carregamento e criação de snapshots, reduzindo o acoplamento entre quem usa os dados e os detalhes de cada API.
+- **Adapter (`SpaceObjectDisplayAdapter`)**: adapta asteroides, cometas e satélites para formatos textuais consistentes. A formatação específica por tipo fica isolada do menu, facilitando a manutenção e a inclusão de novos tipos de objeto.
+
+### Correções
+
+- **Fallback de cache (`SpaceDataService`)**: a busca tenta a API e usa o cache quando a chamada falha. Isso mantém os dados disponíveis durante indisponibilidades e permite que a atualização forçada realmente tente obter dados novos antes do fallback.
+- **Seleção do objeto mais próximo (`DailySnapshot`)**: satélites não participam dessa comparação, pois a distância orbital estimada deles não é comparável às distâncias astronômicas de passagem de asteroides e periélio de cometas.
+
