@@ -1,6 +1,7 @@
 package com.rastreadorespacial.domain;
 
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 

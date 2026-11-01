@@ -23,6 +23,6 @@ class SpaceDataParserTest {
         assertEquals(1, cometas.size());
         assertEquals("67P", cometas.get(0).getId());
         assertEquals(4.1, cometas.get(0).getDiametroNucleoKm());
-        assertEquals(1.24 * 149_597_870.7, cometas.get(0).getDistanciaPerielio().emKilometros(), 0.001);
+        assertEquals(1.24 * 149_597_870.7, cometas.get(0).getDistanciaPerielio().emQuilometros(), 0.001);
     }
 }
