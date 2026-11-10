@@ -9,14 +9,29 @@ import com.rastreadorespacial.domain.SpaceObject;
 import com.rastreadorespacial.domain.SnapshotFormatter;
 import com.rastreadorespacial.domain.ApodInfo;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class RetratoDiarioScreen extends AbstractScreen {
     private final SnapshotHistoryStore historyStore = new SnapshotHistoryStore(AppConfig.DATA_DIR.resolve("snapshots"));
+    private final Consumer<URI> browserOpener;
 
     public RetratoDiarioScreen(MenuNavigator navigator, MenuContext context) {
+        this(navigator, context, RetratoDiarioScreen::abrirNoNavegador);
+    }
+
+    RetratoDiarioScreen(MenuNavigator navigator, MenuContext context, Consumer<URI> browserOpener) {
         super(navigator, context);
+        this.browserOpener = Objects.requireNonNull(browserOpener);
     }
 
     @Override
@@ -63,8 +78,32 @@ public final class RetratoDiarioScreen extends AbstractScreen {
         navigator.output().println("Título: " + apod.titulo());
         navigator.output().println("Data: " + apod.data());
         navigator.output().println("Descrição: " + apod.explicacao());
-        if (!apod.url().isBlank()) {
-            navigator.output().println("Imagem: " + apod.url());
+        try {
+            LocalDate data = LocalDate.parse(apod.data());
+            URI paginaApod = URI.create("https://apod.nasa.gov/apod/ap"
+                    + data.format(DateTimeFormatter.ofPattern("yyMMdd")) + ".html");
+            navigator.output().println("Abrindo a foto oficial do APOD no navegador: " + paginaApod);
+            browserOpener.accept(paginaApod);
+        } catch (DateTimeParseException e) {
+            navigator.output().println("[ERRO] Data inválida para abrir a foto do APOD: " + apod.data());
+        } catch (UncheckedIOException | UnsupportedOperationException | SecurityException e) {
+            navigator.output().println("[AVISO] Não foi possível abrir o navegador: " + e.getMessage());
+            navigator.output().println("Acesse a página oficial do APOD manualmente.");
+        }
+    }
+
+    private static void abrirNoNavegador(URI pagina) {
+        if (!Desktop.isDesktopSupported()) {
+            throw new UnsupportedOperationException("Este ambiente não oferece suporte a navegador.");
+        }
+        Desktop desktop = Desktop.getDesktop();
+        if (!desktop.isSupported(Desktop.Action.BROWSE)) {
+            throw new UnsupportedOperationException("Este ambiente não oferece suporte à abertura de links.");
+        }
+        try {
+            desktop.browse(pagina);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Falha ao abrir a página do APOD.", e);
         }
     }
 

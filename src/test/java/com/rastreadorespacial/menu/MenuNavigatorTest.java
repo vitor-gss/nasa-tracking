@@ -13,9 +13,11 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -114,6 +116,29 @@ class MenuNavigatorTest {
 
         screen.tratarEscolha("1");
         assertTrue(bytes.toString().contains("Asteroide de teste"));
+    }
+
+    @Test
+    void fotoDoDiaAbrePaginaOficialMesmoQuandoApiRetornaLogo() {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        SpaceDataClient emptyClient = () -> "{}";
+        SpaceDataClient apodClient = () -> """
+                {"title":"NASA Science","date":"2026-11-10","explanation":"Saturn Behind the Moon",
+                 "url":"https://science.nasa.gov/wp-content/themes/nasa-child/assets/images/nasa-logo@2x.png",
+                 "hdurl":"https://science.nasa.gov/wp-content/themes/nasa-child/assets/images/nasa-logo@2x.png"}
+                """;
+        SpaceDataService service = new SpaceDataService(
+                new RawDataStore(tempDir), new RetryPolicy(Duration.ZERO, ignored -> {}), 1);
+        MenuContext context = new MenuContext(
+                service, emptyClient, apodClient, emptyClient, new PrintStream(bytes));
+        MenuNavigator navigator = new MenuNavigator(null, new Scanner(""), new PrintStream(bytes));
+        AtomicReference<URI> openedPage = new AtomicReference<>();
+        RetratoDiarioScreen screen = new RetratoDiarioScreen(navigator, context, openedPage::set);
+
+        screen.tratarEscolha("4");
+
+        assertEquals(URI.create("https://apod.nasa.gov/apod/ap261110.html"), openedPage.get());
+        assertTrue(bytes.toString().contains("Abrindo a foto oficial do APOD no navegador"));
     }
 
     private MenuContext context(ByteArrayOutputStream bytes) {
