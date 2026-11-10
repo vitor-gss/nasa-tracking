@@ -1,5 +1,7 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 import com.rastreadorespacial.domain.HasDistance;
 import com.rastreadorespacial.domain.SpaceObject;
 import com.rastreadorespacial.domain.DistanceUnit;
@@ -38,7 +40,7 @@ public final class ObjetosProximosScreen extends AbstractScreen {
             case 1 -> imprimirOrdenados(context.registry().listarTodos());
             case 2 -> imprimirMaisProximo();
             case 3 -> navigator.irPara(new FiltroTipoScreen(navigator, context));
-            case 4 -> context.alterarUnidadeDistancia(navigator);
+            case 4 -> escolherUnidadeDistancia();
             default -> { }
         }
     }

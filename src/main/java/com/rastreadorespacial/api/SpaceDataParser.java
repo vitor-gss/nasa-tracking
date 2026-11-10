@@ -2,6 +2,7 @@ package com.rastreadorespacial.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rastreadorespacial.padroes.criacionais.singleton.JsonMapper;
 import com.rastreadorespacial.domain.Asteroid;
 import com.rastreadorespacial.domain.Comet;
 import com.rastreadorespacial.domain.Distance;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public final class SpaceDataParser {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.INSTANCE.mapper(); // Singleton
 
     private SpaceDataParser() {
         // Classe utilitária estática
@@ -104,7 +105,13 @@ public final class SpaceDataParser {
                     Double meanMotion = satNode.hasNonNull("MEAN_MOTION") ? satNode.path("MEAN_MOTION").asDouble() : null;
 
                     if (!id.isBlank()) {
-                        satelites.add(new Satellite(id, name, bstar, inclination, eccentricity, meanMotion));
+                        // Builder: etapas nomeadas em vez de 6 valores posicionais (vários podem ser null)
+                        satelites.add(new Satellite.Builder(id, name)
+                                .decaimentoOrbitalDiario(bstar)
+                                .inclinacaoGraus(inclination)
+                                .excentricidade(eccentricity)
+                                .movimentoMedioRevDia(meanMotion)
+                                .build());
                     }
                 }
             }

@@ -2,6 +2,7 @@ package com.rastreadorespacial.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rastreadorespacial.padroes.criacionais.singleton.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.rastreadorespacial.config.AppConfig;
 
@@ -18,7 +19,7 @@ import java.util.List;
 /** Cliente da NASA/JPL SBDB para dados orbitais de cometas conhecidos. */
 public class SbdbClient implements SpaceDataClient {
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.INSTANCE.mapper(); // Singleton
     private static final List<String> COMETAS_PADRAO = List.of("1P", "2P", "9P", "19P", "67P", "109P", "C/2020 F3");
 
     private final HttpClient httpClient;

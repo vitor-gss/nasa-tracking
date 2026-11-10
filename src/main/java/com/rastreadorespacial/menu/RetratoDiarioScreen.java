@@ -1,10 +1,13 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 import com.rastreadorespacial.config.AppConfig;
 import com.rastreadorespacial.domain.DailySnapshot;
 import com.rastreadorespacial.domain.RiskLevel;
 import com.rastreadorespacial.domain.SpaceObject;
 import com.rastreadorespacial.domain.SnapshotFormatter;
+import com.rastreadorespacial.domain.ApodInfo;
 
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +54,7 @@ public final class RetratoDiarioScreen extends AbstractScreen {
     }
 
     private void imprimirApod() {
-        MenuContext.ApodInfo apod = context.apod();
+        ApodInfo apod = context.apod();
         navigator.output().println("APOD - Foto astronômica do dia:");
         if (apod == null) {
             navigator.output().println("Dados do objeto do dia indisponíveis. Atualize o feed APOD primeiro.");

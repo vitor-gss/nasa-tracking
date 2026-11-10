@@ -1,5 +1,7 @@
 package com.rastreadorespacial.domain;
 
+import java.util.Objects;
+
 /**
  * Representa os níveis fechados de risco para objetos espaciais rastreados.
  *

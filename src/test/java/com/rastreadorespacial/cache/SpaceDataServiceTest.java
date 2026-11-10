@@ -81,7 +81,9 @@ class SpaceDataServiceTest {
             throw new SpaceApiException(429, "Rate limit persistente");
         };
 
-        CachedDataResult result = service.fetch("apod", mockFailingClient);
+        // Força a API: sem forçar, o cache existente é usado direto e a API nem é chamada
+        // (comportamento verificado em testFetchUsesLocalCacheWhenAvailable).
+        CachedDataResult result = service.fetch("apod", mockFailingClient, true);
 
         assertNotNull(result);
         assertEquals("apod", result.source());

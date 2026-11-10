@@ -1,7 +1,10 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 import com.rastreadorespacial.domain.RiskLevel;
 import com.rastreadorespacial.domain.SpaceObject;
+import com.rastreadorespacial.padroes.comportamentais.visitor.TipoObjetoVisitor;
 import com.rastreadorespacial.risk.RiskRanking;
 
 import java.util.List;
@@ -56,7 +59,7 @@ public final class RastrearObjetosScreen extends AbstractScreen {
                 aguardandoNome = true;
                 navigator.output().println("Digite o nome do objeto (ou 0 para voltar):");
             }
-            case 4 -> context.alterarUnidadeDistancia(navigator);
+            case 4 -> escolherUnidadeDistancia();
             default -> { }
         }
     }
@@ -83,7 +86,7 @@ public final class RastrearObjetosScreen extends AbstractScreen {
             navigator.output().println("Detalhes: " + MenuFormatters.objeto(objeto, context.unidadeDistancia()));
             navigator.output().println("ID canônico: " + objeto.getIdCanonico());
             navigator.output().println("Nível de risco: " + objeto.avaliarRisco().name());
-            navigator.output().println("Tipo: " + objeto.getClass().getSimpleName());
+            navigator.output().println("Tipo: " + objeto.aceitar(new TipoObjetoVisitor())); // Visitor
         }, () -> navigator.output().println("Nenhum objeto encontrado com esse nome."));
     }
 }

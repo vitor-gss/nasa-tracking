@@ -1,6 +1,7 @@
 package com.rastreadorespacial.menu;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rastreadorespacial.padroes.criacionais.singleton.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rastreadorespacial.domain.DailySnapshot;
 import com.rastreadorespacial.domain.SnapshotFormatter;
@@ -15,7 +16,7 @@ import java.util.List;
 /** Persiste o resumo mínimo de cada retrato para permitir consulta histórica. */
 final class SnapshotHistoryStore {
     private final Path directory;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = JsonMapper.INSTANCE.mapper(); // Singleton
 
     SnapshotHistoryStore(Path directory) {
         this.directory = directory;

@@ -1,5 +1,7 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 import com.rastreadorespacial.domain.Asteroid;
 import com.rastreadorespacial.domain.Comet;
 import com.rastreadorespacial.domain.Satellite;

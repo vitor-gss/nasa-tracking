@@ -1,5 +1,7 @@
 package com.rastreadorespacial.domain;
 
+import com.rastreadorespacial.padroes.comportamentais.visitor.SpaceObjectVisitor;
+
 /**
  * Interface comum para todos os objetos espaciais rastreáveis pelo sistema.
  */
@@ -36,4 +38,17 @@ public interface SpaceObject {
      * @return nível de risco como enum {@link RiskLevel}
      */
     RiskLevel avaliarRisco();
+
+    /**
+     * <strong>Visitor — papel Element.</strong> Oferece este objeto ao visitante. Os tipos concretos
+     * ({@link Asteroid}, {@link Comet}, {@link Satellite}) sobrescrevem chamando {@code visitante.visitar(this)},
+     * o que seleciona o método certo sem {@code instanceof}. Outros tipos caem em {@code visitarOutro}.
+     *
+     * @param visitante operação a executar sobre este objeto
+     * @param <R>       tipo do resultado
+     * @return resultado da operação
+     */
+    default <R> R aceitar(SpaceObjectVisitor<R> visitante) {
+        return visitante.visitarOutro(this);
+    }
 }

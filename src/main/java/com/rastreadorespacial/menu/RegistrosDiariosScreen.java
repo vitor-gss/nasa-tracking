@@ -1,5 +1,7 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 import com.rastreadorespacial.domain.Locatable;
 import com.rastreadorespacial.domain.Position;
 import com.rastreadorespacial.domain.SpaceObject;
@@ -52,7 +54,7 @@ public final class RegistrosDiariosScreen extends AbstractScreen {
                 navigator.output().println("Digite o nome do objeto (ou 0 para voltar):");
             }
             case 3 -> imprimirSemPosicao();
-            case 4 -> context.alterarUnidadeDistancia(navigator);
+            case 4 -> escolherUnidadeDistancia();
             default -> { }
         }
     }

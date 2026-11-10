@@ -1,5 +1,7 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 import com.rastreadorespacial.api.RetryPolicy;
 import com.rastreadorespacial.api.SpaceDataClient;
 import com.rastreadorespacial.cache.RawDataStore;

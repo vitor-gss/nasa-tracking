@@ -2,6 +2,7 @@ package com.rastreadorespacial.dashboard;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rastreadorespacial.padroes.criacionais.singleton.JsonMapper;
 import com.rastreadorespacial.api.ApodClient;
 import com.rastreadorespacial.api.CelestrakClient;
 import com.rastreadorespacial.api.NeoWsClient;
@@ -18,6 +19,7 @@ import com.rastreadorespacial.domain.RiskLevel;
 import com.rastreadorespacial.domain.Satellite;
 import com.rastreadorespacial.domain.SnapshotFormatter;
 import com.rastreadorespacial.domain.SpaceObject;
+import com.rastreadorespacial.padroes.comportamentais.visitor.SpaceObjectVisitor;
 import com.rastreadorespacial.domain.TrackedObjectRegistry;
 import com.rastreadorespacial.risk.RiskRanking;
 
@@ -34,7 +36,7 @@ import java.util.Objects;
 /** Orquestra a coleta, agregação e exibição do painel diário. */
 public final class Dashboard {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.INSTANCE.mapper(); // Singleton
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final SpaceDataService dataService;
@@ -176,24 +178,41 @@ public final class Dashboard {
     }
 
     private String descricaoObjeto(SpaceObject objeto) {
-        if (objeto instanceof Asteroid asteroid) {
+        return objeto.aceitar(new DescricaoPainelVisitor()); // Visitor
+    }
+
+    /**
+     * <strong>Padrão comportamental: Visitor — ConcreteVisitor.</strong> Descrição usada no painel diário
+     * (distâncias sempre em LD). É uma operação nova sobre os mesmos tipos, sem alterar Asteroid, Comet ou Satellite.
+     */
+    private static final class DescricaoPainelVisitor implements SpaceObjectVisitor<String> {
+        @Override
+        public String visitar(Asteroid asteroid) {
             return String.format(Locale.US, "Asteroide %s — %.1f distâncias lunares",
                     asteroid.getNome(), asteroid.getDistanciaDePassagem().emDistanciasLunares());
         }
-        if (objeto instanceof Comet comet) {
+
+        @Override
+        public String visitar(Comet comet) {
             String nucleo = comet.getDiametroNucleoKm() == null
                     ? "N/D"
                     : String.format(Locale.US, "%.1f", comet.getDiametroNucleoKm());
             return String.format("Cometa %s — núcleo %s km", comet.getNome(), nucleo);
         }
-        if (objeto instanceof Satellite satellite) {
+
+        @Override
+        public String visitar(Satellite satellite) {
             String decaimento = satellite.getDecaimentoOrbitalDiario() == null
                     ? "N/D"
                     : String.format(Locale.US, "%.2f", satellite.getDecaimentoOrbitalDiario());
             return String.format("Satélite %s (NORAD %s) — decaimento %s km/dia",
                     satellite.getNome(), satellite.getId(), decaimento);
         }
-        return objeto.getNome();
+
+        @Override
+        public String visitarOutro(SpaceObject objeto) {
+            return objeto.getNome();
+        }
     }
 
     private String legendaDeRisco() {

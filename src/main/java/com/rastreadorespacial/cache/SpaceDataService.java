@@ -64,15 +64,25 @@ public class SpaceDataService {
         }
 
         Optional<CachedDataResult> cachedOptional = rawDataStore.loadMostRecent(source);
+        if (!forceRefresh && cachedOptional.isPresent()) {
+            CachedDataResult cached = cachedOptional.get();
+            System.out.println(String.format(
+                    "[AVISO] Usando dados locais de %s para %s (arquivo de %s)",
+                    source,
+                    source.toUpperCase(),
+                    cached.dataDoArquivo()
+            ));
+            return new CachedDataResult(
+                    cached.source(),
+                    cached.rawJson(),
+                    true,
+                    cached.dataDoArquivo(),
+                    1,
+                    false
+            );
+        }
 
         try {
-            if (forceRefresh && cachedOptional.isPresent()) {
-                System.out.println(String.format(
-                        "[AVISO] Atualização forçada de %s pela API (ignorando cache local)",
-                        source
-                ));
-            }
-
             RetryPolicy.RetryResult<String> retryResult = retryPolicy.executeWithRetryDetailed(
                     client::fetchRaw,
                     maxAttempts,
@@ -90,24 +100,6 @@ public class SpaceDataService {
                     retryResult.totalAttempts(),
                     false
             );
-        } catch (AssertionError e) {
-            if (cachedOptional.isPresent()) {
-                CachedDataResult cached = cachedOptional.get();
-                System.out.println(String.format(
-                        "[AVISO] API de %s indisponível; usando cache local de %s",
-                        source,
-                        cached.dataDoArquivo()
-                ));
-                return new CachedDataResult(
-                        cached.source(),
-                        cached.rawJson(),
-                        true,
-                        cached.dataDoArquivo(),
-                        maxAttempts,
-                        false
-                );
-            }
-            throw e;
         } catch (SpaceApiException e) {
             boolean isPersistent429 = e.getStatusCode() == 429;
             cachedOptional = rawDataStore.loadMostRecent(source);

@@ -1,5 +1,7 @@
 package com.rastreadorespacial.domain;
 
+import com.rastreadorespacial.padroes.comportamentais.visitor.SpaceObjectVisitor;
+
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Objects;
@@ -52,6 +54,68 @@ public final class Satellite implements SpaceObject, Locatable, HasDistance {
         this.movimentoMedioRevDia = movimentoMedioRevDia != null ? movimentoMedioRevDia : 15.5;
     }
 
+    /**
+     * <strong>Padrão criacional: Builder.</strong> (EM USO em {@code SpaceDataParser.parseCelestrak()};
+     * fica aqui por ser classe interna do Satellite — ver padroes/criacionais)
+     *
+     * <p>O construtor completo de {@link Satellite} recebe seis valores posicionais, quatro deles opcionais e
+     * frequentemente {@code null} (o "construtor telescópico" do slide). O Builder monta o satélite passo a passo,
+     * com etapas nomeadas, e só cria o objeto imutável em {@link #build()}.</p>
+     *
+     * <pre>{@code
+     * Satellite iss = new Satellite.Builder("25544", "ISS")
+     *         .decaimentoOrbitalDiario(0.0002)
+     *         .movimentoMedioRevDia(15.5)
+     *         .build();
+     * }</pre>
+     */
+    public static final class Builder {
+        private final String id;
+        private final String nome;
+        private Double decaimentoOrbitalDiario;
+        private Double inclinacaoGraus;
+        private Double excentricidade;
+        private Double movimentoMedioRevDia;
+
+        /**
+         * @param id   identificador NORAD (obrigatório)
+         * @param nome nome do satélite (obrigatório)
+         */
+        public Builder(String id, String nome) {
+            this.id = id;
+            this.nome = nome;
+        }
+
+        public Builder decaimentoOrbitalDiario(Double valor) {
+            this.decaimentoOrbitalDiario = valor;
+            return this;
+        }
+
+        public Builder inclinacaoGraus(Double valor) {
+            this.inclinacaoGraus = valor;
+            return this;
+        }
+
+        public Builder excentricidade(Double valor) {
+            this.excentricidade = valor;
+            return this;
+        }
+
+        public Builder movimentoMedioRevDia(Double valor) {
+            this.movimentoMedioRevDia = valor;
+            return this;
+        }
+
+        /**
+         * Cria o satélite. Campos opcionais não informados recebem os valores padrão do construtor.
+         *
+         * @return novo satélite imutável
+         */
+        public Satellite build() {
+            return new Satellite(id, nome, decaimentoOrbitalDiario, inclinacaoGraus, excentricidade, movimentoMedioRevDia);
+        }
+    }
+
     @Override
     public String getId() {
         return id;
@@ -71,18 +135,17 @@ public final class Satellite implements SpaceObject, Locatable, HasDistance {
         return decaimentoOrbitalDiario;
     }
 
+    /**
+     * Um satélite não tem distância de aproximação comparável à de asteroides e cometas: ele orbita a Terra
+     * a algumas centenas de quilômetros de altitude. Usar essa altitude como "distância de referência" fazia
+     * qualquer satélite aparecer como "o objeto mais próximo" do retrato diário (RF7). Por isso a distância de
+     * referência não é aplicável; a altitude do satélite continua disponível em {@link #getPosicaoAtual()} (RF6).
+     *
+     * @return sempre {@link Optional#empty()}
+     */
     @Override
     public Optional<Distance> getDistanciaDeReferencia() {
-        return Optional.of(calcularDistanciaOrbitalReferencia());
-    }
-
-    private Distance calcularDistanciaOrbitalReferencia() {
-        double altitudeKm = 420.0;
-        if (movimentoMedioRevDia != null && movimentoMedioRevDia > 0) {
-            altitudeKm = Math.max(150.0, Math.min(36000.0,
-                    6371.0 * (Math.pow(15.5 / movimentoMedioRevDia, 2.0 / 3.0) - 1.0) + 420.0));
-        }
-        return Distance.ofKilometers(altitudeKm);
+        return Optional.empty();
     }
 
     public Double getInclinacaoGraus() {
@@ -134,6 +197,12 @@ public final class Satellite implements SpaceObject, Locatable, HasDistance {
         }
 
         return new Position(lat, lon, Distance.ofKilometers(altKm), now);
+    }
+
+    /** Visitor — ConcreteElement: despacho duplo, escolhe {@code visitar(Satellite)} sem instanceof. */
+    @Override
+    public <R> R aceitar(SpaceObjectVisitor<R> visitante) {
+        return visitante.visitar(this);
     }
 
     @Override

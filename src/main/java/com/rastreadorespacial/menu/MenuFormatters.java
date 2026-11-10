@@ -1,6 +1,7 @@
 package com.rastreadorespacial.menu;
 
-import com.rastreadorespacial.adapter.SpaceObjectDisplayAdapter;
+import com.rastreadorespacial.padroes.comportamentais.visitor.DescricaoObjetoVisitor;
+
 import com.rastreadorespacial.domain.Distance;
 import com.rastreadorespacial.domain.DistanceUnit;
 import com.rastreadorespacial.domain.HasDistance;
@@ -17,7 +18,8 @@ final class MenuFormatters {
     }
 
     static String objeto(SpaceObject objeto, DistanceUnit unidade) {
-        return new SpaceObjectDisplayAdapter(objeto, unidade).formatar();
+        // Visitor: o próprio objeto escolhe o método de descrição certo (sem instanceof)
+        return objeto.aceitar(new DescricaoObjetoVisitor(unidade));
     }
 
     static String risco(SpaceObject objeto) {
@@ -33,7 +35,13 @@ final class MenuFormatters {
     }
 
     static String distancia(SpaceObject objeto, DistanceUnit unidade) {
-        return new SpaceObjectDisplayAdapter(objeto, unidade).formatarDistanciaDeReferencia();
+        if (objeto instanceof HasDistance hasDistance) {
+            return hasDistance.getDistanciaDeReferencia()
+                    .map(distance -> String.format(Locale.US, "%s — %s",
+                            objeto.getNome(), formatarDistancia(distance, unidade)))
+                    .orElse(objeto.getNome() + " — distância não aplicável");
+        }
+        return objeto.getNome() + " — distância não disponível";
     }
 
     static String posicao(SpaceObject objeto, Position position) {
@@ -41,10 +49,12 @@ final class MenuFormatters {
     }
 
     static String posicao(SpaceObject objeto, Position position, DistanceUnit unidade) {
-        return new SpaceObjectDisplayAdapter(objeto, unidade).formatarPosicao(position);
+        return String.format(Locale.US, "%s — lat %.2f°, lon %.2f°, altitude %s",
+                objeto.getNome(), position.latitudeGraus(), position.longitudeGraus(),
+                formatarDistancia(position.altitude(), unidade));
     }
 
     private static String formatarDistancia(Distance distancia, DistanceUnit unidade) {
-        return SpaceObjectDisplayAdapter.formatarDistancia(distancia, unidade);
+        return DescricaoObjetoVisitor.formatarDistancia(distancia, unidade);
     }
 }

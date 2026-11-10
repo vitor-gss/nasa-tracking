@@ -1,5 +1,7 @@
 package com.rastreadorespacial.domain;
 
+import com.rastreadorespacial.padroes.comportamentais.visitor.SpaceObjectVisitor;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
@@ -96,6 +98,12 @@ public final class Asteroid implements SpaceObject, Locatable, HasDistance {
         double ascensaoReta = (hash % 360) - 180.0; // -180 a +180 graus
 
         return new Position(declinacao, ascensaoReta, distanciaDePassagem, now);
+    }
+
+    /** Visitor — ConcreteElement: despacho duplo, escolhe {@code visitar(Asteroid)} sem instanceof. */
+    @Override
+    public <R> R aceitar(SpaceObjectVisitor<R> visitante) {
+        return visitante.visitar(this);
     }
 
     @Override

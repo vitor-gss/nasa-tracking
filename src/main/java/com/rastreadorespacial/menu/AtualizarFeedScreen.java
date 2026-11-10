@@ -1,5 +1,7 @@
 package com.rastreadorespacial.menu;
 
+import com.rastreadorespacial.padroes.estruturais.facade.MenuContext;
+
 public final class AtualizarFeedScreen extends AbstractScreen {
     public AtualizarFeedScreen(MenuNavigator navigator, MenuContext context) {
         super(navigator, context);

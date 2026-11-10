@@ -6,6 +6,20 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.Scanner;
 
+/**
+ * <strong>Padrão comportamental: State — papel Context.</strong> (EM USO; fica neste pacote, ver padroes/comportamentais)
+ *
+ * <p>Guarda a tela atual (o estado) e <em>delega</em> a ela em {@link #loop()}: {@code exibir()} e
+ * {@code tratarEscolha()}. A mesma entrada ("1") faz coisas diferentes conforme a tela atual, sem nenhum
+ * {@code if} sobre qual tela está ativa. Quem escolhe o próximo estado é a própria tela, chamando
+ * {@link #irPara(Screen)}. Variação usada: estados em pilha, para permitir {@link #voltar()}.</p>
+ *
+ * <ul>
+ *   <li><b>Context:</b> MenuNavigator</li>
+ *   <li><b>State:</b> {@link Screen}</li>
+ *   <li><b>ConcreteState:</b> MainMenuScreen, ObjetosProximosScreen, RastrearObjetosScreen, ... (via AbstractScreen)</li>
+ * </ul>
+ */
 public final class MenuNavigator {
     private final Deque<Screen> pilha = new ArrayDeque<>();
     private final Scanner scanner;
